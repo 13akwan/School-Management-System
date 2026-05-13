@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Teaching;
 
 class Subject extends Model
 {
@@ -10,4 +11,8 @@ class Subject extends Model
     protected $fillable = [
         'name'
         ];
+
+    public function teachings(){
+        return $this->hasMany(Teaching::class, 'subject_id');
+    }
 }

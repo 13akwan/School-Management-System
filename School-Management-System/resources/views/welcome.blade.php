@@ -5,33 +5,30 @@
     <title>SMKN 10 Salatiga</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
+        html{
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #f8fafc;
         }
 
-        /* NAVBAR */
         .navbar {
             backdrop-filter: blur(10px);
         }
 
         .logo {
-            width: 40px;
-            height: 40px;
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
         }
 
-        .logo img{
-            object-fit: cover;
-        }
-
-        /* HERO */
         .hero {
             position: relative;
             height: 90vh;
@@ -55,6 +52,21 @@
             z-index: 2;
         }
 
+        .hero-btn{
+            background: #0d1b2a;
+            color: white;
+            border-radius: 10px;
+            padding: 12px 28px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .hero-btn:hover{
+            background: #13263b;
+            color: white;
+            transform: translateY(-2px);
+        }
+
         .hero h1 {
             font-size: 3rem;
             font-weight: 700;
@@ -66,7 +78,6 @@
             margin-bottom: 40px;
         }
 
-        /* CARD */
         .card-custom {
             border: none;
             border-radius: 15px;
@@ -84,7 +95,6 @@
             object-fit: cover;
         }
 
-        /* TESTIMONI */
         .testimonial {
             padding: 25px;
             border-radius: 15px;
@@ -101,7 +111,6 @@
             margin-bottom: 10px;
         }
 
-        /* DOCUMENTATION */
         .gallery img {
             border-radius: 10px;
             transition: 0.3s;
@@ -111,7 +120,6 @@
             transform: scale(1.05);
         }
 
-        /* FOOTER */
         footer {
             background: #0d1b2a;
         }
@@ -128,7 +136,6 @@
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top px-4">
     <div class="container-fluid">
         <div class="d-flex align-items-center">
@@ -140,17 +147,20 @@
     </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
     <div class="hero-content">
         <h1>SMK Negeri 10 Salatiga</h1>
-        <p class="lead">SMK Bisa, SMK Hebat 🚀</p>
-        <a href="#" class="btn btn-light mt-3">Lihat Program</a>
+        <p class="lead">SMK Bisa, SMK Hebat</p>
+        <a href="#program" 
+            class="btn hero-btn mt-3">
+
+            Lihat Program
+
+        </a>
     </div>
 </section>
 
-<!-- JURUSAN -->
-<section class="py-5">
+<section class="py-5" id="program">
     <div class="container text-center">
         <h2 class="section-title">Program Keahlian</h2>
 
@@ -188,7 +198,6 @@
     </div>
 </section>
 
-<!-- DOKUMENTASI -->
 <section class="py-5 bg-light">
     <div class="container text-center">
         <h2 class="section-title">Dokumentasi Kegiatan</h2>
@@ -207,7 +216,6 @@
     </div>
 </section>
 
-<!-- TESTIMONI -->
 <section class="py-5">
     <div class="container text-center">
         <h2 class="section-title">Testimoni Alumni</h2>
@@ -244,7 +252,6 @@
     </div>
 </section>
 
-<!-- FOOTER -->
 <footer class="text-white pt-5 pb-3">
     <div class="container">
         <div class="row">

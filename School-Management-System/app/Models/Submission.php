@@ -14,6 +14,7 @@ class Submission extends Model
         'task_id',
         'student_id',
         'content',
+        'file',
         'submitted_at'
     ];
 
@@ -23,5 +24,10 @@ class Submission extends Model
 
     public function student(){
         return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function grade()
+    {
+        return $this->hasOne(Grade::class);
     }
 }

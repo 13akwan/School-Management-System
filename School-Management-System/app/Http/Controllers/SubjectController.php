@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\SchoolClass;
 use App\Models\Subject;
 
 class SubjectController extends Controller
@@ -12,9 +10,24 @@ class SubjectController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $subjects = Subject::all();
+        $query = Subject::query();
+
+        // search
+        if ($request->search) {
+
+            $query->where(
+                'name',
+                'like',
+                '%' . $request->search . '%'
+            );
+        }
+
+        $subjects = $query
+            ->latest()
+            ->paginate(10);
+
         return view('subjects.index', compact('subjects'));
     }
 
@@ -32,14 +45,16 @@ class SubjectController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required'
+            'name' => 'required|unique:tbl_subjects,name'
         ]);
 
         Subject::create([
             'name' => $request->name
         ]);
 
-        return redirect()->route('subjects.index');
+        return redirect()
+            ->route('admin.subjects.index')
+            ->with('success', 'Subject berhasil dibuat');
     }
 
     /**
@@ -64,14 +79,16 @@ class SubjectController extends Controller
     public function update(Request $request, Subject $subject)
     {
         $request->validate([
-            'name' => 'required'
+            'name' => 'required|unique:tbl_subjects,name,' . $subject->id
         ]);
 
         $subject->update([
             'name' => $request->name
         ]);
 
-        return redirect()->route('subjects.index');
+        return redirect()
+            ->route('admin.subjects.index')
+            ->with('success', 'Subject berhasil diupdate');
     }
 
     /**
@@ -80,6 +97,8 @@ class SubjectController extends Controller
     public function destroy(Subject $subject)
     {
         $subject->delete();
-        return redirect()->route('subjects.index');
+        return redirect()
+            ->route('admin.subjects.index')
+            ->with('success', 'Subject berhasil dihapus');
     }
 }

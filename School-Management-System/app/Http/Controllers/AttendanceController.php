@@ -6,34 +6,116 @@ use Illuminate\Http\Request;
 use App\Models\Attendance;
 use App\Models\Teaching;
 use App\Models\User;
+use App\Models\SchoolClass;
 
 class AttendanceController extends Controller
 {
-    public function index(){
-
+    public function index(Request $request)
+    {
         $user = auth()->user();
 
-        if ($user->role === 'admin'){
-            $attendances = Attendance::all();
-        } elseif ($user->role === 'teacher'){
-            $attendances = Attendance::whereHas('teaching', function($q){
-                $q->where('teacher_id', auth()->id());
-            })->get();
-        } elseif ($user->role === 'student'){
-            $attendances = Attendance::whereHas('student_id', auth()->id())->get();
+        $query = Attendance::with([
+            'student',
+            'teaching.subject',
+            'teaching.class'
+        ]);
+
+        if ($user->role === 'admin') {
+
         }
 
-        return view('attendances.index', compact('attendances'));
+        elseif ($user->role === 'teacher') {
+
+            $query->whereHas('teaching', function ($q) {
+
+                $q->where(
+                    'teacher_id',
+                    auth()->id()
+                );
+
+            });
+
+            if ($request->class_id) {
+
+                $query->whereHas('teaching', function ($q) use ($request) {
+
+                    $q->where(
+                        'class_id',
+                        $request->class_id
+                    );
+
+                });
+
+            }
+
+        }
+
+        elseif ($user->role === 'student') {
+
+            $query->where(
+                'student_id',
+                auth()->id()
+            );
+
+        }
+
+        if ($request->date) {
+
+            $query->whereDate(
+                'date',
+                $request->date
+            );
+
+        }
+
+        $attendances = $query
+            ->latest()
+            ->paginate(10);
+
+        $classes = SchoolClass::all();
+
+        return view('attendances.index', compact(
+            'attendances',
+            'classes'
+        ));
     }
 
-    public function create(){
-        $teachings = Teaching::all();
+    public function create()
+    {
+        $teachings = Teaching::where('teacher_id', auth()->id())
+            ->with(['subject', 'class'])
+            ->get();
+
         $students = User::where('role', 'student')->get();
 
-        return view('attendances.create', compact('teachings', 'students'));
+        return view('attendances.create', compact(
+            'teachings',
+            'students'
+        ));
     }
 
-    public function store(Request $request){
+    public function update(Request $request, Attendance $attendance)
+    {
+        $request->validate([
+            'status' => 'required'
+        ]);
+
+        $attendance->update([
+            'status' => $request->status
+        ]);
+
+        return redirect()
+            ->route('teacher.attendances.index')
+            ->with('success', 'Attendance berhasil diupdate');
+    }
+
+    public function edit(Attendance $attendance)
+    {
+        return view('attendances.edit', compact('attendance'));
+    }
+
+    public function store(Request $request)
+    {
         $request->validate([
             'teaching_id' => 'required',
             'student_id' => 'required',
@@ -41,13 +123,31 @@ class AttendanceController extends Controller
             'status' => 'required'
         ]);
 
-        Attendance::create($request->all());
+        $exists = Attendance::where('student_id', $request->student_id)
+            ->where('teaching_id', $request->teaching_id)
+            ->where('date', $request->date)
+            ->exists();
 
-        return redirect()->route('attendances.index');
+        if ($exists) {
+            return redirect()->back()
+                ->with('error', 'Siswa sudah melakukan absensi pada mapel ini.');
+        }
+
+        Attendance::create([
+            'teaching_id' => $request->teaching_id,
+            'student_id' => $request->student_id,
+            'date' => $request->date,
+            'status' => $request->status,
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Absensi berhasil ditambahkan.');
     }
 
     public function destroy(Attendance $attendance){
         $attendance->delete();
-        return redirect()->route('attendances.index');
+        return redirect()
+            ->route('teacher.attendances.index')
+            ->with('success', 'Attendances berhasil dihapus');
     }
 }

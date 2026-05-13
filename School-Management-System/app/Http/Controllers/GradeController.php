@@ -19,18 +19,24 @@ class GradeController extends Controller
                 $q->where('teacher_id', auth()->id());
             })->get();
         } elseif ($user->role === 'student'){
-            $grades = Grade::whereHas('student_id', auth()->id())->get();
+            $grades = Grade::where('student_id', auth()->id())->get();
         }
 
         return view('grades.index', compact('grades'));
     }
 
-    public function create(){
-        $submissions = Submission::with(['task', 'student'])->get();
-        return view('grades.create', compact('submissions'));
+    public function create(Request $request)
+    {
+        $submission = Submission::with([
+            'student',
+            'task'
+        ])->findOrFail($request->submission_id);
+
+        return view('grades.create', compact('submission'));
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $request->validate([
             'submission_id' => 'required',
             'score' => 'required|integer|min:0|max:100'
@@ -38,14 +44,28 @@ class GradeController extends Controller
 
         $submission = Submission::findOrFail($request->submission_id);
 
-        Grade::create([
-            'student_id' => $submission->student_id,
-            'task_id' => $submission->task_id,
-            'submission_id' => $submission->id,
-            'score' => $request->score
-        ]);
+        if ($submission->task->teaching->teacher_id !== auth()->id()) {
+            abort(403);
+        }
 
-    }
+        Grade::updateOrCreate(
+
+            [
+                'student_id' => $submission->student_id,
+                'task_id' => $submission->task_id,
+            ],
+
+            [
+                'submission_id' => $submission->id,
+                'score' => $request->score
+            ]
+        );
+
+            return redirect()
+                ->route('teacher.submissions.index')
+                ->with('success', 'Nilai berhasil disimpan');
+        }
+
 
         public function destroy(Grade $grade){
             $grade->delete();

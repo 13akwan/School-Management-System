@@ -2,15 +2,47 @@
 
 @section('content')
 
-<h1>Edit Class</h1>
+<h1 class="h3 mb-4 text-gray-800">
+    Edit Class
+</h1>
 
-<form action="{{ route('classes.update', $class->id) }}" method="POST">
-    @csrf
-    @method('PUT')
+<div class="card shadow">
 
-    <input type="text" name="name" value="{{ $class->name }}">
+    <div class="card-body">
 
-    <button type="submit">Update</button>
-</form>
+        <form action="{{ route('admin.classes.update', $class->id) }}"
+              method="POST">
+
+            @csrf
+            @method('PUT')
+
+            <div class="mb-3">
+
+                <label>Class Name</label>
+
+                <input type="text"
+                       name="name"
+                       class="form-control"
+                       value="{{ old('name', $class->name) }}"
+                       required>
+
+            </div>
+
+            <button class="btn btn-primary">
+                Update
+            </button>
+
+            <a href="{{ route('admin.classes.index') }}"
+               class="btn btn-secondary">
+
+                Back
+
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
 
 @endsection

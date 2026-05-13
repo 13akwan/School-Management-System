@@ -2,14 +2,45 @@
 
 @section('content')
 
-<h1>Create Class</h1>
+<h1 class="h3 mb-4 text-gray-800">
+    Create Class
+</h1>
 
-<form action="{{ route('classes.store') }}" method="POST">
-    @csrf
+<div class="card shadow">
 
-    <input type="text" name="name" placeholder="Class Name">
+    <div class="card-body">
 
-    <button type="submit">Save</button>
-</form>
+        <form action="{{ route('admin.classes.store') }}"
+              method="POST">
+
+            @csrf
+
+            <div class="mb-3">
+
+                <label>Class Name</label>
+
+                <input type="text"
+                       name="name"
+                       class="form-control"
+                       required>
+
+            </div>
+
+            <button class="btn btn-primary">
+                Save
+            </button>
+
+            <a href="{{ route('admin.classes.index') }}"
+               class="btn btn-secondary">
+
+                Back
+
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
 
 @endsection

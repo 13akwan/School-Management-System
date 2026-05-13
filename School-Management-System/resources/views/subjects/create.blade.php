@@ -2,14 +2,47 @@
 
 @section('content')
 
-<h1>Create Subject</h1>
+<h1 class="h3 mb-4 text-gray-800">
+    Create Subject
+</h1>
 
-<form action="{{ route('subjects.store') }}" method="POST">
-    @csrf
+<div class="card shadow">
 
-    <input type="text" name="name" placeholder="Subject Name">
+    <div class="card-body">
 
-    <button type="submit">Save</button>
-</form>
+        <form action="{{ route('admin.subjects.store') }}"
+              method="POST">
+
+            @csrf
+
+            <div class="mb-3">
+
+                <label>Subject Name</label>
+
+                <input type="text"
+                       name="name"
+                       class="form-control"
+                       required>
+
+            </div>
+
+            <button class="btn btn-primary">
+
+                Save
+
+            </button>
+
+            <a href="{{ route('admin.subjects.index') }}"
+               class="btn btn-secondary">
+
+                Back
+
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
 
 @endsection

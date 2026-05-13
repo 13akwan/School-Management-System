@@ -11,10 +11,42 @@ class ClassController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $classes = SchoolClass::all();
-        return view ('classes.index', compact('classes'));
+        $query = SchoolClass::query();
+
+        if ($request->search) {
+
+            $query->where(
+                'name',
+                'like',
+                '%' . $request->search . '%'
+            );
+        }
+
+        if ($request->grade) {
+
+            $query->where(
+                'name',
+                'like',
+                $request->grade . ' %'
+            );
+        }
+
+        if ($request->major) {
+
+            $query->where(
+                'name',
+                'like',
+                '%' . $request->major . '%'
+            );
+        }
+
+        $classes = $query
+            ->latest()
+            ->paginate(10);
+
+        return view('classes.index', compact('classes'));
     }
 
     /**
@@ -31,14 +63,16 @@ class ClassController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required'
+            'name' => 'required|unique:tbl_classes,name'
         ]);
 
         SchoolClass::create([
             'name' => $request->name
         ]);
 
-        return redirect()->route('classes.index');
+        return redirect()
+            ->route('admin.classes.index')
+            ->with('success', 'Class berhasil dibuat');
     }
 
     /**
@@ -63,14 +97,16 @@ class ClassController extends Controller
     public function update(Request $request, SchoolClass $class)
     {
         $request->validate([
-            'name' => 'required'
+            'name' => 'required|unique:tbl_classes,name,' . $class->id
         ]);
 
         $class->update([
             'name' => $request->name
         ]);
 
-        return redirect()->route('classes.index');
+        return redirect()
+            ->route('admin.classes.index')
+            ->with('success', 'Class berhasil diupdate');
     }
 
     /**
@@ -79,6 +115,8 @@ class ClassController extends Controller
     public function destroy(SchoolClass $class)
     {
         $class->delete();
-        return redirect()->route('classes.index');
+        return redirect()
+        ->route('admin.classes.index')
+        ->with('success', 'Class berhasil dihapus');
     }
 }

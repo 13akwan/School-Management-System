@@ -3,7 +3,7 @@
 namespace App\Models;
 use App\Models\User;
 use App\Models\Task;
-use App\Models\Submissions;
+use App\Models\Submission;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,5 +28,10 @@ class Grade extends Model
 
     public function submission(){
         return $this->belongsTo(Submission::class);
+    }
+
+    public function grade()
+    {
+        return $this->hasOne(Grade::class);
     }
 }

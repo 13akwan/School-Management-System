@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 use App\Models\Subject;
 use App\Models\SchoolClass;
+use App\Models\Task;
+use App\Models\Attendance;
 
 class Teaching extends Model
 {
@@ -29,6 +31,16 @@ class Teaching extends Model
 
     public function class()
     {
-        return $this->belongsTo(SchoolClass::class);
+        return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
     }
 }

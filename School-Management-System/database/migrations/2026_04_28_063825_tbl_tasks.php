@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('teaching_id')->constrained('tbl_teachings')->cascadeOnDelete();
             $table->date('due_date')->nullable();
             $table->enum('type', ['assignment', 'oral']);
+            $table->timestamps();
         });
     }
 

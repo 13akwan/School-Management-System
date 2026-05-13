@@ -13,19 +13,102 @@ class TeachingController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin'){
-            $teachings = Teaching::all();
-        } elseif ($user->role === 'teacher'){
-            $teachings = Teaching::whereHas('teacher_id', auth()->id())->get();
-        } else {
-            $teachings = collect();
+        $query = Teaching::with([
+            'teacher',
+            'subject',
+            'class'
+        ]);
+
+        if ($user->role === 'teacher') {
+
+            $query->where('teacher_id', auth()->id());
+
         }
 
-        return view('teachings.index', compact('teachings'));
+        if ($request->search) {
+
+            $query->where(function ($q) use ($request) {
+
+                $q->whereHas('teacher', function ($teacher) use ($request) {
+
+                    $teacher->where(
+                        'name',
+                        'like',
+                        '%' . $request->search . '%'
+                    );
+
+                })
+
+                ->orWhereHas('subject', function ($subject) use ($request) {
+
+                    $subject->where(
+                        'name',
+                        'like',
+                        '%' . $request->search . '%'
+                    );
+
+                })
+
+                ->orWhereHas('class', function ($class) use ($request) {
+
+                    $class->where(
+                        'name',
+                        'like',
+                        '%' . $request->search . '%'
+                    );
+
+                });
+
+            });
+        }
+
+        if ($request->teacher_id) {
+
+            $query->where(
+                'teacher_id',
+                $request->teacher_id
+            );
+
+        }
+
+        if ($request->subject_id) {
+
+            $query->where(
+                'subject_id',
+                $request->subject_id
+            );
+
+        }
+
+        if ($request->class_id) {
+
+            $query->where(
+                'class_id',
+                $request->class_id
+            );
+
+        }
+
+        $teachings = $query
+            ->latest()
+            ->paginate(10);
+
+        $teachers = User::where('role', 'teacher')->get();
+
+        $subjects = Subject::all();
+
+        $classes = SchoolClass::all();
+
+        return view('teachings.index', compact(
+            'teachings',
+            'teachers',
+            'subjects',
+            'classes'
+        ));
     }
 
     /**
@@ -51,9 +134,29 @@ class TeachingController extends Controller
             'class_id' => 'required',
         ]);
 
-        Teaching::create($request->all());
+        $exists = Teaching::where([
+            'teacher_id' => $request->teacher_id,
+            'subject_id' => $request->subject_id,
+            'class_id' => $request->class_id,
+        ])->exists();
 
-        return redirect()->route('teachings.index');
+        if($exists){
+            return back()
+                ->withErrors([
+                    'duplicate' => 'Teaching sudah ada'
+                ])
+                ->withInput();
+        }
+
+        Teaching::create([
+            'teacher_id' => $request->teacher_id,
+            'subject_id' => $request->subject_id,
+            'class_id' => $request->class_id,
+        ]);
+
+        return redirect()
+            ->route('admin.teachings.index')
+            ->with('success', 'Teaching berhasil dibuat');
     }
 
     /**
@@ -67,17 +170,43 @@ class TeachingController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Teaching $teaching)
     {
-        //
+        $teachers = User::where('role', 'teacher')->get();
+
+        $subjects = Subject::all();
+
+        $classes = SchoolClass::all();
+
+        return view('teachings.edit', compact(
+            'teaching',
+            'teachers',
+            'subjects',
+            'classes'
+        ));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+
+    public function update(Request $request, Teaching $teaching)
     {
-        //
+        $request->validate([
+            'teacher_id' => 'required',
+            'subject_id' => 'required',
+            'class_id' => 'required',
+        ]);
+
+        $teaching->update([
+            'teacher_id' => $request->teacher_id,
+            'subject_id' => $request->subject_id,
+            'class_id' => $request->class_id,
+        ]);
+
+        return redirect()
+            ->route('admin.teachings.index')
+            ->with('success', 'Teaching berhasil diupdate');
     }
 
     /**
@@ -86,6 +215,8 @@ class TeachingController extends Controller
     public function destroy(Teaching $teaching)
     {
         $teaching->delete();
-        return redirect()->route('teachings.index');
+        return redirect()
+            ->route('admin.teachings.index')
+            ->with('success', 'Teaching berhasil dihapus');
     }
 }
